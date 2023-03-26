@@ -1,7 +1,15 @@
 {
   "expo": {
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ]
+    ],
     "name": "PrefectoBotApp",
-    "slug": "PrefectoBotApp",
+    "slug": "prefectobotapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,6 +33,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "af527b7f-239b-4155-978b-a2f04137076f"
+      }
+    },
+    "owner": "julian_parra"
   }
 }
