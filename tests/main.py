@@ -51,8 +51,9 @@ def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'photo' not in request.files:
-            print('no file')
-            return json.dumps({'files':{ 'photo': request.files['photo']}})
+            print(request.json)
+            print('No photo sent!')
+            return json.dumps({'response': 'epic fail!'})
         file = request.files['photo']
         # If the user does not select a file,   qthe browser submits an
         # empty file without a filename.

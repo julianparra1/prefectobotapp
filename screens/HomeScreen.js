@@ -13,13 +13,13 @@ export default HomeScreen = ({navigation}) => {
         </Text>
         <Text style={{ paddingLeft: 8, color: '#fff', fontSize: 16, fontWeight: '100' }}>A p l i c a c i o n  M o v i l</Text>
         <View style={[styles.buttonContainer, { borderWidth: 4, borderColor: "#A25AD6", borderRadius: 18 }]}>
-          <Pressable style={styles.button} onPress={() => navigation.navigate('FaceRecognition')}>
+          <Pressable style={styles.button} onPress={() => navigation.navigate('FaceRec')}>
             <MaterialCommunityIcons name="face-recognition" size={16} color="black" />
             <Text style={{ paddingLeft: 8, color: '#151718', fontSize: 16 }}>Registrar asistencia</Text>
           </Pressable>
         </View>
         <View style={[styles.buttonContainer, { borderWidth: 4, borderColor: "#A25AD6", borderRadius: 18 }]}>
-          <Pressable style={styles.button} onPress={() => navigation.navigate('FaceRecognition')}>
+          <Pressable style={styles.button} onPress={() => navigation.navigate('Prefecto')}>
             <MaterialCommunityIcons name="face-recognition" size={16} color="black" />
             <Text style={{ paddingLeft: 8, color: '#151718', fontSize: 16 }}>Acceso prefectura</Text>
           </Pressable>

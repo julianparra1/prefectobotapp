@@ -3,8 +3,8 @@ import { MaterialCommunityIcons  } from '@expo/vector-icons';
 import * as FaceDetector from 'expo-face-detector';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
-import Constants from 'expo-constants';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 export default FaceRecognitionScreen = ({navigation}) => {
   const [type, setType] = useState(CameraType.front);
@@ -12,6 +12,8 @@ export default FaceRecognitionScreen = ({navigation}) => {
   const [detection, setDetection] = useState(false);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   
+  const isFocused = useIsFocused();
+
   requestPermission();
   
   if (!permission) {
@@ -58,7 +60,7 @@ export default FaceRecognitionScreen = ({navigation}) => {
 
     const imgopts = {
       imageType: "jpg",
-      quality: 0,
+      quality: 0, 
       skipProcessing: true
     }
 
@@ -67,7 +69,8 @@ export default FaceRecognitionScreen = ({navigation}) => {
       const response = await sendCapturedImageAsync(uri)
       const responeJSON = await response.json()
       if(responeJSON.response === 'success'){
-        console.log(responeJSON)  
+        console.log(responeJSON)
+        navigation.navigate('QrCode')
       }
       
   });
@@ -87,7 +90,7 @@ export default FaceRecognitionScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Camera ref={(r) => {this.camera = r}} ratio='1:1' type={type} onFacesDetected={handleFacesDetected}
+      {isFocused && <Camera ref={(r) => {this.camera = r}} ratio='1:1' type={type} onFacesDetected={handleFacesDetected}
               faceDetectorSettings={{
                 mode: FaceDetector.FaceDetectorMode.fast,
                 detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
@@ -96,7 +99,7 @@ export default FaceRecognitionScreen = ({navigation}) => {
               }} 
               style={styles.camera} 
               >
-      </Camera>
+      </Camera> }
 
         <View style={[styles.buttonContainer, { borderWidth: 4, borderColor: detection ?  "#A25AD6" : "#808080", borderRadius: 18 }]}>
           <Pressable disabled={!detection} style={styles.button} onPress={captureFaceAsync}>

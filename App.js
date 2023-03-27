@@ -1,10 +1,13 @@
 import {NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import FaceRecognitionScreen from './screens/FaceRecognition';
-import HomeScreen from './screens/Home'
+import FaceRecognitionScreen from './screens/FaceRecognitionScreen';
 
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+
+import HomeScreen from './screens/HomeScreen'
+import PrefectoScreen from './screens/PrefectoScreen';
+import QrCodeScreen from './screens/QrCodeScreen';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -18,7 +21,7 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={{ colors: { background: '#000' }}}>
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
@@ -36,7 +39,9 @@ export default function App() {
             fontWeight: 'bold',
           }
         }}/>
-        <Stack.Screen name="FaceRecognition" component={FaceRecognitionScreen} />
+        <Stack.Screen name="FaceRec" options={{headerShow: false, unmountOnBlur: true}} component={FaceRecognitionScreen} />
+        <Stack.Screen name="QrCode" component={QrCodeScreen} />
+        <Stack.Screen name="Prefecto" component={PrefectoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
