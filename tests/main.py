@@ -55,11 +55,11 @@ def upload_file():
             print('No photo sent!')
             return json.dumps({'response': 'epic fail!'})
         file = request.files['photo']
+        file.read()
         # If the user does not select a file,   qthe browser submits an
         # empty file without a filename.
-        file.save(os.path.join(UPLOAD_FOLDER, f'{secrets.token_urlsafe(16)}.jpg'))
-    return json.dumps({'response': 'success'})
-
+        file.saave(os.path.join(UPLOAD_FOLDER, f'{secrets.token_urlsafe(16)}.jpg'))
+a
     
     
 if __name__ == '__main__':

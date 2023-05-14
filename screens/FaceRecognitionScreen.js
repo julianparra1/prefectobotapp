@@ -4,6 +4,7 @@ import * as FaceDetector from 'expo-face-detector';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { useIsFocused } from '@react-navigation/native';
 
 export default FaceRecognitionScreen = ({navigation}) => {
@@ -19,10 +20,20 @@ export default FaceRecognitionScreen = ({navigation}) => {
   if (!permission) {
     navigation.goBack
   }
+  async function resizeImgAsync(uri) {
+    const resizedPhoto = await manipulateAsync(
+      uri,
+      [{ resize: { width: 780 } }],
+      { compress: 1, format: 'jpeg' },
+    );
+  
+    return resizedPhoto;
+  };
 
   async function sendCapturedImageAsync(uri){
+    
     // https://github.com/expo/examples/blob/master/with-formdata-image-upload/App.js
-    let url = "http://192.168.1.65:3000/post";
+    let url = "http://192.168.1.200:5000/post";
 
     let uriArray = uri.split(".");
     let fileType = uriArray[uriArray.length - 1];
@@ -44,7 +55,7 @@ export default FaceRecognitionScreen = ({navigation}) => {
       },
     };
 
-    return fetch(url, options)
+    return await fetch(url, options)
   }
 
   async function captureFaceAsync() {
@@ -66,11 +77,12 @@ export default FaceRecognitionScreen = ({navigation}) => {
 
 
     this.camera.takePictureAsync(imgopts).then(async ({uri}) => {
-      const response = await sendCapturedImageAsync(uri)
+      const resizedImg = await resizeImgAsync(uri)
+      const response = await sendCapturedImageAsync(resizedImg.uri)
       const responeJSON = await response.json()
-      if(responeJSON.response === 'success'){
-        console.log(responeJSON)
-        navigation.navigate('QrCode')
+      console.log(responeJSON)
+      if(responeJSON.response === "200 Success" && responeJSON.user){
+        navigation.navigate('QrCode', {user: responeJSON.user })
       }
       
   });

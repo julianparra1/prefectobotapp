@@ -6,7 +6,8 @@ import { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 
-export default QrCodeScreen = ({navigation}) => {
+export default QrCodeScreen = ({route, navigation}) => {
+  const { user } = route.params
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   
@@ -20,7 +21,7 @@ export default QrCodeScreen = ({navigation}) => {
 
   async function sendQrCodeAsync(qrdata){
     // https://github.com/expo/examples/blob/master/with-formdata-image-upload/App.js
-    let url = "http://192.168.1.65:3000/post";
+    let url = "http://192.168.1.200:5000/post";
 
     const data = { string: qrdata };
 
@@ -54,7 +55,7 @@ export default QrCodeScreen = ({navigation}) => {
         }}
         style={styles.camera} 
         /> }
-      <Text style={{ color: '#fff' }}>Bienvenido a la app!</Text>
+      <Text style={{ color: '#fff' }}>Bienvenido {user}! escanea tu codigo QR en pantalla..</Text>
       <StatusBar style="auto" />
     </View>
   );
