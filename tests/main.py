@@ -16,9 +16,16 @@ Robot con la capacidad de realizar tareas de prefecto
 :copyright: (c) 2023-present by Julian Parra
 :license: MIT License, see LICENSE for more details.
 """
-
+from exponent_server_sdk import (
+    DeviceNotRegisteredError,
+    PushClient,
+    PushMessage,
+    PushServerError,
+    PushTicketError,
+)
 import json
 import os
+from string import Template
 import secrets
 from flask import Flask, flash, request, redirect, url_for, send_from_directory
 from flask_socketio import SocketIO, emit
@@ -46,22 +53,53 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/post', methods=['GET', 'POST'])
+@app.route('/post', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
         if 'photo' not in request.files:
-            print(request.json)
-            print('No photo sent!')
-            return json.dumps({'response': 'epic fail!'})
-        file = request.files['photo']
-        file.read()
-        # If the user does not select a file,   qthe browser submits an
-        # empty file without a filename.
-        file.saave(os.path.join(UPLOAD_FOLDER, f'{secrets.token_urlsafe(16)}.jpg'))
-a
-    
-    
+            return json.dumps({'response': '400 Bad Request'}), 400
+        if True:
+            return json.dumps({'response': '200 Success', 'user': 'J'}), 200
+
+        
+@app.route('/new', methods=['POST'])
+def new_face():
+    if request.method == 'POST':
+        if 'photo' not in request.files:
+            return json.dumps({'response': '400 Bad Request'}), 400
+        if True:
+            print(request.files['photo'].filename)
+            print(request.form['user'])
+            return json.dumps({'response': '200 Success'}), 200
+
+def send_push_message(token, title, message, extra=None):
+    try:
+        response = PushClient().publish(
+            PushMessage(to=token,
+                        title=title,
+                        body=message,
+                        data=extra))
+    except PushServerError as exc:
+        # Encountered some likely formatting/validation error.
+        print(
+            {
+                'token': token,
+                'message': message,
+                'extra': extra,
+                'errors': exc.errors,
+                'response_data': exc.response_data,
+            })
+        raise
+
 if __name__ == '__main__':
+    x =  '{"files" : []}'
+    z = json.loads(x)
+    for f in os.listdir():
+        print(f)
+        y = Template('{"url": "${file}"}')
+        z["files"].append(y.substitute(file=f))
+        
+    send_push_message('ExponentPushToken[VY4iFDOLwuwP1ketscb_VI]', 'Running', 'Hello!', {'url': 'http://192.168.1.65:5000'})
+    print(json.dumps(z))
     # Iniciamos aplicacion Flask+SocketIo
-    socketio.run(app, host='0.0.0.0', port=3000) #ssl_context='adhoc'
+    socketio.run(app, host='0.0.0.0', port=5000) #ssl_context='adhoc'

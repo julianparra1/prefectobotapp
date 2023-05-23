@@ -1,41 +1,105 @@
 import { Camera, CameraType } from 'expo-camera';
 import { MaterialCommunityIcons  } from '@expo/vector-icons'; 
 import * as FaceDetector from 'expo-face-detector';
+
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import { useIsFocused } from '@react-navigation/native';
 
 export default PrefectoScreen = ({navigation}) => {
   const [type, setType] = useState(CameraType.front);
-  const [faceDetection, setFaceDetection] = useState(true);
   const [detection, setDetection] = useState(false);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   
+  const isFocused = useIsFocused();
+
   requestPermission();
   
   if (!permission) {
     navigation.goBack
   }
+  async function resizeImgAsync(uri) {
+    const resizedPhoto = await manipulateAsync(
+      uri,
+      [{ resize: { width: 780 } }],
+      { compress: 1, format: 'jpeg' },
+    );
+  
+    return resizedPhoto;
+  };
 
-  function toggleCameraType() {
-    setFaceDetection(false)
-    setType(current => (current === CameraType.front ? CameraType.back : CameraType.front));
+  async function sendCapturedImageAsync(uri){
+    
+    // https://github.com/expo/examples/blob/master/with-formdata-image-upload/App.js
+    let url = "http://192.168.1.200:5000/post";
+
+    let uriArray = uri.split(".");
+    let fileType = uriArray[uriArray.length - 1];
+
+    let formData = new FormData();
+    formData.append("photo", {
+      uri,
+      name: `photo.${fileType}`,
+      type: `image/${fileType}`,
+    });
+
+    let options = {
+      method: "POST",
+      body: formData,
+      mode: 'cors',
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data; charset=ISO-8859-1",
+      },
+    };
+
+    return await fetch(url, options)
+  }
+
+  async function captureFaceAsync() {
+    console.log('capture')
+
+    if(!this.camera){
+      console.log('no cam');
+    }
+
+    if (!detection) {
+      console.log('no face');
+    };
+
+    const imgopts = {
+      imageType: "jpg",
+      quality: 0, 
+      skipProcessing: true
+    }
+
+
+    this.camera.takePictureAsync(imgopts).then(async ({uri}) => {
+      const resizedImg = await resizeImgAsync(uri)
+      const response = await sendCapturedImageAsync(resizedImg.uri)
+      const responeJSON = await response.json()
+      console.log(responeJSON)
+      if(responeJSON.response === "200 Success" && responeJSON.user){
+        this.camera.pausePreview()
+        navigation.navigate('NuevaCara', {user: responeJSON.user })
+      }});
+    
   }
   
   
-  const handleFacesDetected = ({ faces }) => { 
-    if (faceDetection) {
-      if (faces.length > 0) {
-        setDetection(true)
-      } else {
-        setDetection(false)
-      };
-    };
+  const handleFacesDetected = async ({ faces }) => { 
+    if (faces.length > 0) {
+      setDetection(true)
+    } else {
+      setDetection(false)
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Camera ratio='1:1' type={type} onFacesDetected={handleFacesDetected}
+      {isFocused && <Camera ref={(r) => {this.camera = r}} ratio='1:1' type={type} onFacesDetected={handleFacesDetected}
               faceDetectorSettings={{
                 mode: FaceDetector.FaceDetectorMode.fast,
                 detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
@@ -44,14 +108,14 @@ export default PrefectoScreen = ({navigation}) => {
               }} 
               style={styles.camera} 
               >
-      </Camera>
+      </Camera> }
 
-        <View style={[styles.buttonContainer, { borderWidth: 4, borderColor: detection ?  "#A25AD6" : "#808080", borderRadius: 18 }]}>
-          <Pressable disabled={!detection} style={styles.button} onPress={toggleCameraType}>
+      {isFocused && <View style={[styles.buttonContainer, { borderWidth: 4, borderColor: detection ?  "#A25AD6" : "#808080", borderRadius: 18 }]}>
+          <Pressable disabled={!detection} style={styles.button} onPress={captureFaceAsync}>
             <MaterialCommunityIcons name="face-recognition" size={16} color="black" />
             <Text style={{ paddingLeft: 8, color: '#151718', fontSize: 16 }}>Log In!</Text>
           </Pressable>
-        </View>
+        </View> }
 
       <Text style={{ color: '#fff' }}>Bienvenido a la app!</Text>
       <StatusBar style="auto" />

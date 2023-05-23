@@ -1,13 +1,14 @@
 import {NavigationContainer} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FaceRecognitionScreen from './screens/FaceRecognitionScreen';
-
+import { useEffect } from 'react';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-
+import { Linking } from 'react-native';
 import HomeScreen from './screens/HomeScreen'
 import PrefectoScreen from './screens/PrefectoScreen';
 import QrCodeScreen from './screens/QrCodeScreen';
+import NewFaceScreen from './screens/NewFaceScreen';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -17,9 +18,19 @@ Notifications.setNotificationHandler({
   }),
 });
 
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const url = response.notification.request.content.data.url;
+      Linking.openURL(url);
+    });
+    return () => subscription.remove();
+  }, []);
+  
   return (
     <NavigationContainer theme={{ colors: { background: '#000' }}}>
       <Stack.Navigator
@@ -40,8 +51,10 @@ export default function App() {
           }
         }}/>
         <Stack.Screen name="FaceRec" options={{headerShow: false, unmountOnBlur: true}} component={FaceRecognitionScreen} />
-        <Stack.Screen name="QrCode" component={QrCodeScreen} />
-        <Stack.Screen name="Prefecto" component={PrefectoScreen} />
+        <Stack.Screen name="QrCode" component={QrCodeScreen} options={{headerShow: false, unmountOnBlur: true}} />
+        <Stack.Screen name="Prefecto" component={PrefectoScreen} options={{headerShow: false, unmountOnBlur: true}} />
+        <Stack.Screen name="NuevaCara" component={NewFaceScreen} options={{headerShow: false, unmountOnBlur: true}} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
